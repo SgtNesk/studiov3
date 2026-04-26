@@ -1,4 +1,10 @@
-export default function Home({ methods, onMethodClick, onGuideClick, onApiKeyClick }) {
+import { getSessions } from '../lib/sessions'
+import { countDueCards } from '../lib/sr'
+import { METHODS } from '../data/methods'
+
+export default function Home({ methods, onMethodClick, onGuideClick, onApiKeyClick, onLibraryClick }) {
+  const recentSessions = getSessions().slice(0, 4)
+
   return (
     <div className="max-w-[1040px] mx-auto px-7 py-12">
       <div className="mb-10">
@@ -63,6 +69,60 @@ export default function Home({ methods, onMethodClick, onGuideClick, onApiKeyCli
           </div>
         ))}
       </div>
+
+      {/* Recent sessions */}
+      {recentSessions.length > 0 && (
+        <div className="mt-14">
+          <div className="flex items-baseline justify-between mb-4">
+            <div className="font-mono text-[9px] tracking-[0.3em] uppercase text-ink3">
+              Sessioni recenti
+            </div>
+            <button
+              className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink3 hover:text-ink transition-colors bg-transparent border-0 p-0 cursor-pointer"
+              onClick={onLibraryClick}
+            >
+              Libreria completa →
+            </button>
+          </div>
+          <div className="flex flex-col gap-2">
+            {recentSessions.map(session => {
+              const method = METHODS.find(m => m.id === session.methodId)
+              const due =
+                session.methodId === 'activerecall'
+                  ? countDueCards(session.data?.cards)
+                  : 0
+              return (
+                <div
+                  key={session.id}
+                  className="bg-app-white border border-border flex items-center gap-4 px-5 py-3 cursor-pointer hover:border-ink transition-colors"
+                  style={{ borderLeftColor: method?.color, borderLeftWidth: 3 }}
+                  onClick={() => onMethodClick(session.methodId)}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="font-serif text-[14px] font-semibold truncate">
+                      {session.topic || <span className="text-ink3 italic">Senza titolo</span>}
+                    </div>
+                    <div className="font-mono text-[9px] text-ink3 mt-0.5">
+                      {method?.name} ·{' '}
+                      {new Date(session.updatedAt).toLocaleDateString('it-IT', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </div>
+                  </div>
+                  {due > 0 && (
+                    <span className="font-mono text-[8px] tracking-[0.1em] uppercase px-2 py-0.5 bg-[#1a5a5a] text-white flex-shrink-0">
+                      {due} da rivedere
+                    </span>
+                  )}
+                  <div className="text-ink3 text-[16px] flex-shrink-0">→</div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Responsive for smaller screens */}
       <style>{`

@@ -1,11 +1,28 @@
-export default function TopBar({ view, method, apiKey, onHome, onOpenSettings, onExportPDF }) {
+export default function TopBar({
+  view,
+  method,
+  apiKey,
+  isDirty,
+  savedAt,
+  onHome,
+  onOpenSettings,
+  onExportPDF,
+  onSave,
+  onLibrary,
+}) {
   const isWorkspaceOrGuide = view === 'workspace' || view === 'guide'
   const methodLabel =
     view === 'guide'
-      ? 'GUIDA ALL\'USO'
+      ? "GUIDA ALL'USO"
+      : view === 'library'
+      ? 'LIBRERIA'
       : method
       ? method.name.toUpperCase()
       : 'Scegli un metodo'
+
+  const savedLabel = savedAt
+    ? `✓ ${savedAt.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`
+    : null
 
   return (
     <div className="fixed top-0 left-0 right-0 h-[52px] bg-app-white border-b border-border flex items-center px-7 gap-4 z-[100]">
@@ -29,6 +46,14 @@ export default function TopBar({ view, method, apiKey, onHome, onOpenSettings, o
         >
           API Key
         </button>
+        {view !== 'library' && (
+          <button
+            className="print-hide border border-border bg-transparent px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase text-ink2 hover:border-ink hover:text-ink hover:bg-bg transition-all"
+            onClick={onLibrary}
+          >
+            Libreria
+          </button>
+        )}
         {isWorkspaceOrGuide && (
           <button
             className="print-hide border border-border bg-transparent px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase text-ink2 hover:border-ink hover:text-ink hover:bg-bg transition-all"
@@ -38,12 +63,26 @@ export default function TopBar({ view, method, apiKey, onHome, onOpenSettings, o
           </button>
         )}
         {view === 'workspace' && (
-          <button
-            className="print-hide border border-ink bg-ink text-app-white px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase hover:bg-[#333] transition-colors"
-            onClick={onExportPDF}
-          >
-            Esporta PDF
-          </button>
+          <>
+            {isDirty ? (
+              <button
+                className="print-hide border border-ink bg-ink text-app-white px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase hover:bg-[#333] transition-colors"
+                onClick={onSave}
+              >
+                Salva
+              </button>
+            ) : savedLabel ? (
+              <span className="print-hide font-mono text-[10px] tracking-[0.1em] text-ink3">
+                {savedLabel}
+              </span>
+            ) : null}
+            <button
+              className="print-hide border border-border bg-transparent px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase text-ink2 hover:border-ink hover:text-ink hover:bg-bg transition-all"
+              onClick={onExportPDF}
+            >
+              PDF
+            </button>
+          </>
         )}
       </div>
     </div>
