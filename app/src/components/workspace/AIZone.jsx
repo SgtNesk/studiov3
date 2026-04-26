@@ -23,18 +23,10 @@ export default function AIZone({ method, data, apiKey, onOpenSettings, color }) 
     const prompt = method.aiPrompt(topic, data)
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': key,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          messages: [{ role: 'user', content: prompt }],
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, apiKey: key }),
       })
       const json = await res.json()
       if (json.error) {
