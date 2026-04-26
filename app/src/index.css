@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: #f5f3ef;
+  color: #18160f;
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  color: #18160f;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+::placeholder {
+  color: #d0cdc5;
+  font-style: italic;
+}
+
+/* ── Dynamic card-color via CSS variable ── */
+.method-card {
+  position: relative;
+  overflow: hidden;
+}
+.method-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--card-color, #18160f);
+}
+.method-card:hover {
+  border-color: var(--card-color, #18160f);
+}
+
+/* Focus states that follow the method color */
+.cc-focus:focus {
+  border-color: var(--card-color, #18160f) !important;
+  outline: none;
+}
+.cc-focus-bottom:focus {
+  border-bottom-color: var(--card-color, #18160f) !important;
+  outline: none;
+}
+
+/* Guide method color */
+.gm-has-color .gm-badge {
+  background: var(--gm-color, #18160f);
+}
+.gm-has-color .gm-border-bottom {
+  border-bottom-color: var(--gm-color, #18160f);
+}
+.gm-has-color .gm-color-text {
+  color: var(--gm-color, #18160f);
+}
+.gm-has-color .gm-color-border-left {
+  border-left-color: var(--gm-color, #d0cdc5);
+}
+.gm-has-color .gm-cue-text {
+  color: var(--gm-color, #18160f);
+}
+.gm-has-color .gm-conf-text {
+  color: var(--gm-color, #18160f);
+}
+
+/* Print */
+.print-footer {
+  display: none;
+}
+@media print {
+  .print-hide {
+    display: none !important;
+  }
+  .print-footer {
+    display: block;
+    position: fixed;
+    bottom: 16px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: #999;
+    letter-spacing: 0.1em;
+  }
+  body {
+    background: white;
+    font-size: 12px;
+  }
+  textarea {
+    border: none !important;
+    background: transparent !important;
+    resize: none;
+    -webkit-print-color-adjust: exact;
+  }
+}

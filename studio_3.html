@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio — Metodi di Apprendimento</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f3ef;
+  --bg2: #eeece7;
+  --bg3: #e5e2db;
+  --ink: #18160f;
+  --ink2: #4a4740;
+  --ink3: #96938a;
+  --border: #d0cdc5;
+  --border2: #e0ddd6;
+  --white: #fafaf7;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;}
+input,textarea,select{font-family:inherit;font-size:inherit;color:var(--ink);}
+button{font-family:inherit;cursor:pointer;}
+::placeholder{color:var(--border);font-style:italic;}
+
+/* ── TOP BAR ── */
+#topbar{
+  position:fixed;top:0;left:0;right:0;
+  height:52px;background:var(--white);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 28px;gap:16px;z-index:100;
+}
+#topbar-logo{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.05em;cursor:pointer;transition:opacity .15s;}
+#topbar-logo:hover{opacity:.6;}
+#topbar-sep{color:var(--border);font-size:18px;}
+#topbar-method{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;}
+#topbar-right{margin-left:auto;display:flex;gap:10px;align-items:center;}
+.tb-btn{
+  border:1px solid var(--border);background:transparent;padding:6px 14px;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink2);transition:all .15s;
+}
+.tb-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--bg);}
+.tb-btn.primary{background:var(--ink);color:var(--white);border-color:var(--ink);}
+.tb-btn.primary:hover{background:#333;}
+#back-btn{display:none;}
+#api-indicator{width:8px;height:8px;border-radius:50%;background:var(--border);}
+#api-indicator.ok{background:#2a7a4e;}
+
+/* ── MAIN ── */
+#app{padding-top:52px;min-height:100vh;}
+
+/* ── HOME ── */
+#home{max-width:1040px;margin:0 auto;padding:48px 28px;}
+.home-header{margin-bottom:40px;}
+.home-title{font-family:'Lora',serif;font-size:36px;font-weight:600;line-height:1.15;margin-bottom:10px;}
+.home-sub{color:var(--ink3);font-size:13px;line-height:1.7;max-width:560px;}
+.home-sub a{color:var(--ink2);text-decoration:underline;cursor:pointer;}
+
+.methods-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:720px){.methods-grid{grid-template-columns:1fr 1fr;}}
+
+.method-card{
+  background:var(--white);border:1px solid var(--border);padding:24px;cursor:pointer;
+  transition:all .15s;position:relative;overflow:hidden;
+}
+.method-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--card-color,var(--ink));
+}
+.method-card:hover{border-color:var(--card-color,var(--ink));transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.06);}
+.mc-origin{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px;}
+.mc-name{font-family:'Lora',serif;font-size:20px;font-weight:600;margin-bottom:6px;}
+.mc-tagline{font-size:12px;color:var(--ink2);line-height:1.5;margin-bottom:14px;font-style:italic;}
+.mc-when-label{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px;}
+.mc-when{font-size:11px;color:var(--ink3);line-height:1.5;}
+
+/* ── WORKSPACE ── */
+#workspace{max-width:900px;margin:0 auto;padding:36px 28px 80px;}
+.ws-header{margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+.ws-method-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px;}
+.ws-title{font-family:'Lora',serif;font-size:28px;font-weight:600;margin-bottom:6px;}
+.ws-desc{font-size:13px;color:var(--ink2);line-height:1.7;max-width:640px;}
+
+.topic-row{display:flex;gap:12px;align-items:flex-end;margin-bottom:28px;}
+.topic-field{flex:1;}
+.field-label{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;}
+.topic-input{
+  width:100%;border:none;border-bottom:2px solid var(--border);background:transparent;
+  padding:8px 0;font-family:'Lora',serif;font-size:18px;font-weight:400;outline:none;
+}
+.topic-input:focus{border-bottom-color:var(--card-color,var(--ink));}
+
+/* block */
+.study-block{margin-bottom:24px;}
+.block-header{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;}
+.block-num{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;
+  color:var(--card-color,var(--ink));letter-spacing:.1em;
+  width:28px;flex-shrink:0;
+}
+.block-title{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:500;}
+.block-hint{font-size:11px;color:var(--ink3);margin-left:auto;font-style:italic;}
+
+.study-textarea{
+  width:100%;border:1px solid var(--border2);background:var(--white);
+  padding:14px 16px;resize:vertical;outline:none;line-height:1.8;
+  font-size:13px;transition:border-color .15s;min-height:90px;
+}
+.study-textarea:focus{border-color:var(--card-color,var(--ink));}
+.study-textarea.large{min-height:140px;}
+.study-textarea.xl{min-height:200px;}
+
+/* cornell specific */
+.cornell-grid{display:grid;grid-template-columns:200px 1fr;gap:0;border:1px solid var(--border);}
+.cornell-cell{padding:14px 16px;background:var(--white);}
+.cornell-cell.cue{background:var(--bg2);border-right:1px solid var(--border);}
+.cornell-cell textarea{border:none;background:transparent;outline:none;width:100%;resize:vertical;line-height:1.8;font-size:13px;min-height:80px;}
+.cornell-head{
+  display:grid;grid-template-columns:200px 1fr;
+  border:1px solid var(--border);border-bottom:none;
+}
+.ch-cell{padding:8px 16px;background:var(--bg3);}
+.ch-cell:first-child{border-right:1px solid var(--border);}
+.ch-cell-label{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);}
+.cornell-summary{border:1px solid var(--border);border-top:2px solid var(--border);background:var(--bg2);padding:14px 16px;}
+
+/* flashcards */
+.flashcard-list{display:flex;flex-direction:column;gap:10px;}
+.flashcard{border:1px solid var(--border);background:var(--white);overflow:hidden;}
+.flashcard-row{display:grid;grid-template-columns:1fr 1fr 80px;gap:0;}
+.fc-cell{padding:10px 14px;border-right:1px solid var(--border2);}
+.fc-cell:last-child{border-right:none;display:flex;align-items:center;justify-content:center;}
+.fc-label{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;}
+.fc-input{border:none;background:transparent;outline:none;width:100%;font-size:12px;line-height:1.6;resize:none;min-height:48px;}
+.fc-conf{display:flex;gap:4px;}
+.conf-btn{width:20px;height:20px;border:1px solid var(--border2);background:transparent;font-size:10px;cursor:pointer;transition:all .1s;}
+.conf-btn.active{background:var(--card-color,var(--ink));color:white;border-color:var(--card-color,var(--ink));}
+.add-card-btn{border:1px dashed var(--border);background:transparent;width:100%;padding:10px;color:var(--ink3);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.add-card-btn:hover{border-color:var(--card-color,var(--ink));color:var(--ink);}
+
+/* concept map */
+.concept-branch{background:var(--white);border:1px solid var(--border);margin-bottom:10px;overflow:hidden;}
+.cb-header{background:var(--bg2);padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;}
+.cb-num{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--card-color,var(--ink));font-weight:500;}
+.cb-input{border:none;background:transparent;outline:none;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.05em;flex:1;}
+.cb-body{padding:10px 14px;}
+.cb-sub{border:none;background:transparent;outline:none;width:100%;font-size:12px;line-height:1.8;resize:none;min-height:56px;}
+
+/* AI zone */
+.ai-zone{background:var(--bg2);border:1px solid var(--border);padding:18px 20px;margin-bottom:24px;}
+.ai-zone-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.ai-zone-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink3);}
+.ai-output{font-size:13px;line-height:1.8;color:var(--ink2);white-space:pre-wrap;min-height:60px;}
+.ai-output.loading{color:var(--ink3);font-style:italic;}
+.ai-output em{color:var(--card-color,var(--ink));font-style:normal;font-weight:500;}
+
+/* key input */
+.api-key-zone{background:var(--bg2);border:1px solid var(--border);padding:14px 16px;display:flex;gap:12px;align-items:center;margin-bottom:20px;}
+.api-key-input{flex:1;border:none;background:var(--white);border:1px solid var(--border);padding:7px 10px;outline:none;font-family:'IBM Plex Mono',monospace;font-size:11px;}
+.api-key-input:focus{border-color:var(--ink);}
+
+/* result zone */
+.result-zone{border:2px solid var(--card-color,var(--ink));background:var(--white);margin-top:28px;}
+.rz-header{background:var(--card-color,var(--ink));padding:10px 18px;color:white;}
+.rz-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.25em;text-transform:uppercase;}
+.rz-body{padding:18px;}
+.rz-output{font-size:13px;line-height:1.9;white-space:pre-wrap;color:var(--ink);}
+
+/* ── PRINT ── */
+@media print {
+  #topbar, .tb-btn, .ai-zone .tb-btn, .print-hide, .add-card-btn { display:none!important; }
+  body { background:white; font-size:12px; }
+  #app { padding-top:0; }
+  #workspace { max-width:100%; padding:24px 20px; }
+  .method-card, #home { display:none; }
+  .study-textarea, .cb-sub, .fc-input, textarea {
+    border:none!important; background:transparent!important; resize:none;
+    -webkit-print-color-adjust:exact;
+  }
+  .study-block { page-break-inside:avoid; }
+  .cornell-grid, .cornell-head, .cornell-summary { -webkit-print-color-adjust:exact; }
+  .ws-header { border-bottom:2px solid #000; }
+  .result-zone { border:1px solid #000; page-break-inside:avoid; }
+  .ai-zone { -webkit-print-color-adjust:exact; page-break-inside:avoid; }
+  .flashcard { page-break-inside:avoid; }
+  .print-footer {
+    display:block!important;
+    position:fixed;bottom:16px;left:0;right:0;text-align:center;
+    font-family:'IBM Plex Mono',monospace;font-size:9px;color:#999;letter-spacing:.1em;
+  }
+}
+.print-footer { display:none; }
+
+/* ── GUIDE ── */
+#guide{max-width:980px;margin:0 auto;padding:40px 28px 80px;}
+.guide-header{margin-bottom:44px;}
+.guide-kicker{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;}
+.guide-title{font-family:'Lora',serif;font-size:34px;font-weight:600;line-height:1.2;margin-bottom:10px;}
+.guide-sub{font-size:13px;color:var(--ink2);line-height:1.8;max-width:620px;}
+.guide-topic-badge{display:inline-flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);padding:6px 14px;margin-top:16px;}
+.gtb-label{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink3);}
+.gtb-val{font-family:'Lora',serif;font-size:14px;font-weight:600;}
+
+.guide-method{margin-bottom:52px;border:1px solid var(--border);background:var(--white);overflow:hidden;}
+.gm-header{padding:20px 28px;border-bottom:2px solid var(--gm-color,var(--ink));display:flex;justify-content:space-between;align-items:flex-start;}
+.gm-left{}
+.gm-origin{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;}
+.gm-name{font-family:'Lora',serif;font-size:22px;font-weight:600;}
+.gm-tagline{font-size:12px;color:var(--ink3);font-style:italic;margin-top:4px;}
+.gm-badge{background:var(--gm-color,var(--ink));color:white;padding:4px 12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;align-self:flex-start;}
+.gm-how{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 28px;font-size:12px;color:var(--ink2);line-height:1.7;}
+.gm-how strong{font-weight:500;color:var(--gm-color,var(--ink));}
+.gm-body{padding:24px 28px;}
+
+.guide-step{margin-bottom:22px;}
+.gs-head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;}
+.gs-num{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--gm-color,var(--ink));width:28px;}
+.gs-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:500;}
+.gs-why{margin-left:auto;font-size:10px;color:var(--ink3);font-style:italic;background:var(--bg2);padding:2px 8px;border-left:2px solid var(--gm-color,var(--border));}
+.gs-content{background:var(--bg2);border:1px solid var(--border);padding:14px 16px;font-size:13px;line-height:1.85;color:var(--ink2);white-space:pre-wrap;}
+.gs-annotation{margin-top:6px;font-size:11px;color:var(--ink3);font-style:italic;line-height:1.6;padding-left:4px;border-left:2px solid var(--border2);}
+
+.guide-cornell-demo{border:1px solid var(--border);overflow:hidden;margin-bottom:22px;}
+.gcd-head{display:grid;grid-template-columns:200px 1fr;background:var(--bg3);border-bottom:1px solid var(--border);}
+.gcd-th{padding:8px 16px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);}
+.gcd-th:first-child{border-right:1px solid var(--border);}
+.gcd-row{display:grid;grid-template-columns:200px 1fr;border-bottom:1px solid var(--border2);}
+.gcd-row:last-child{border-bottom:none;}
+.gcd-cue{background:var(--bg2);padding:10px 16px;border-right:1px solid var(--border);font-size:12px;font-style:italic;color:var(--gm-color,var(--ink));line-height:1.5;}
+.gcd-note{padding:10px 16px;font-size:12px;color:var(--ink2);line-height:1.6;}
+.gcd-summary{background:var(--bg2);border-top:2px solid var(--border);padding:12px 16px;font-size:12px;color:var(--ink2);line-height:1.7;}
+
+.guide-cards-demo{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;}
+.gcard{border:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr 60px;}
+.gcard-cell{padding:10px 14px;border-right:1px solid var(--border2);}
+.gcard-cell:last-child{border-right:none;display:flex;align-items:center;justify-content:center;}
+.gcard-label{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;}
+.gcard-text{font-size:12px;color:var(--ink2);line-height:1.5;}
+.gcard-conf{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;}
+
+.guide-branches-demo{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;}
+.gbranch{border:1px solid var(--border);overflow:hidden;}
+.gbranch-head{background:var(--bg2);padding:8px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;}
+.gbranch-num{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--gm-color,var(--ink));font-weight:500;}
+.gbranch-main{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;}
+.gbranch-body{padding:8px 14px;font-size:12px;color:var(--ink2);line-height:1.7;}
+
+.gm-use-now{margin-top:20px;padding-top:20px;border-top:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;}
+.gun-tip{font-size:12px;color:var(--ink3);font-style:italic;max-width:480px;line-height:1.6;}
+.gun-tip strong{color:var(--gm-color,var(--ink));font-style:normal;}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;
+  display:flex;align-items:center;justify-content:center;
+}
+.modal{background:var(--white);border:1px solid var(--border);padding:32px;max-width:460px;width:90%;}
+.modal h3{font-family:'Lora',serif;font-size:20px;margin-bottom:8px;}
+.modal p{font-size:12px;color:var(--ink3);line-height:1.7;margin-bottom:20px;}
+.modal input{width:100%;border:1px solid var(--border);background:var(--bg);padding:10px 12px;outline:none;font-family:'IBM Plex Mono',monospace;font-size:12px;margin-bottom:14px;}
+.modal input:focus{border-color:var(--ink);}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div id="topbar-logo" onclick="goHome()">STUDIO</div>
+  <div id="topbar-sep">·</div>
+  <div id="topbar-method">Scegli un metodo</div>
+  <div id="topbar-right">
+    <div id="api-indicator" title="API Key"></div>
+    <button class="tb-btn print-hide" id="settings-btn" onclick="openSettings()">API Key</button>
+    <button class="tb-btn print-hide" id="back-btn" onclick="goHome()">← Home</button>
+    <button class="tb-btn primary print-hide" id="export-btn" onclick="exportPDF()" style="display:none">Esporta PDF</button>
+  </div>
+</div>
+
+<div id="app">
+  <div id="home"></div>
+  <div id="guide" style="display:none"></div>
+  <div id="workspace" style="display:none"></div>
+</div>
+
+<div class="print-footer" id="pfooter"></div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="modal" style="display:none">
+  <div class="modal">
+    <h3>Anthropic API Key</h3>
+    <p>Inserisci la tua API key per abilitare l'assistenza AI in ogni metodo di studio. La chiave rimane solo in questa sessione del browser e non viene mai inviata altrove.</p>
+    <input type="password" id="key-input" placeholder="sk-ant-..." autocomplete="off">
+    <div class="modal-btns">
+      <button class="tb-btn" onclick="closeSettings()">Annulla</button>
+      <button class="tb-btn primary" onclick="saveKey()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const METHODS = [
+  {
+    id:'feynman',
+    name:'Tecnica Feynman',
+    origin:'Caltech · Richard Feynman',
+    tagline:'Se non riesci a spiegarlo semplicemente, non lo hai davvero capito.',
+    when:'Concetti astratti, teorie, formule, causa-effetto',
+    color:'#1a3a6b',
+    desc:'Spiega l\'argomento con parole tuossemplici come se dovessi insegnarlo a un ragazzo di 12 anni. Dove ti blocchi, lì c\'è la lacuna reale. Poi torni alla fonte e riempi il vuoto.',
+    steps:[
+      {id:'s1',label:'01 — Spiega semplicemente',hint:'Come la spiegheresti a un ragazzo di 12 anni?',size:'xl',
+        placeholder:'Scrivi tutto quello che capisci dell\'argomento con parole tue, semplici. Non usare termini tecnici che non sai spiegare a tua volta. Se usi una parola, devi sapere cosa significa.'},
+      {id:'s2',label:'02 — Identifica i vuoti',hint:'Dove ti sei bloccato?',size:'large',
+        placeholder:'Elenca i punti dove non hai saputo spiegare, dove hai usato parole che non capisci davvero, dove hai saltato dei passaggi logici...'},
+      {id:'s3',label:'03 — Versione raffinata',hint:'Dopo aver riempito i vuoti, riscrivi',size:'xl',
+        placeholder:'Riscrivi la spiegazione — più semplice, più precisa, senza buchi. Se riesci a spiegarla tutta senza inciampare, la sai.'},
+    ],
+    aiPrompt:(topic,vals)=>`Sei un coach della Tecnica Feynman. Lo studente sta studiando: "${topic}".
+
+Ha scritto questa spiegazione semplice:
+---
+${vals.s1||'(vuota)'}
+---
+Ha identificato questi vuoti:
+${vals.s2||'(nessuno indicato)'}
+
+Il tuo compito:
+1. Identifica 3-5 lacune reali o imprecisioni nella spiegazione (sii preciso, non generico)
+2. Per ogni lacuna, spiega brevemente il concetto mancante in termini semplici
+3. Proponi una domanda Socratica per ciascuna lacuna che aiuti lo studente ad arrivarci da solo
+
+Rispondi in italiano, in modo diretto e didattico.`
+  },
+  {
+    id:'cornell',
+    name:'Cornell Notes',
+    origin:'Cornell University · Walter Pauk',
+    tagline:'Struttura che trasforma appunti passivi in strumenti attivi di revisione.',
+    when:'Lezioni, letture, studio di testi lunghi',
+    color:'#7a1e1e',
+    desc:'Dividi il foglio in tre zone: destra per gli appunti completi, sinistra per le domande-cue che li sintetizzano, in basso il riassunto finale. La colonna sinistra diventa il tuo strumento di interrogazione.',
+    steps:null,
+    aiPrompt:(topic,vals)=>`Sei un esperto di Cornell Notes. Lo studente ha preso appunti su: "${topic}".
+
+Appunti (colonna destra):
+---
+${vals.notes||'(vuoti)'}
+---
+
+Il tuo compito:
+1. Genera 8-10 domande-cue per la colonna sinistra (brevi, incisive, che testano i concetti chiave)
+2. Scrivi un paragrafo di riepilogo (4-6 frasi) per la zona inferiore
+3. Suggerisci 2-3 connessioni con altri argomenti
+
+Formato: elenca prima le domande-cue numerate, poi il riepilogo, poi le connessioni. In italiano.`
+  },
+  {
+    id:'blurting',
+    name:'Blurting Method',
+    origin:'Oxford · Revision technique',
+    tagline:'Recupera tutto dalla memoria prima di guardare. Quello che manca, è quello da studiare.',
+    when:'Revisione, consolidamento, prima di esami',
+    color:'#2a6b3a',
+    desc:'Chiudi il libro. Scrivi tutto quello che ricordi sull\'argomento senza guardare nulla. Poi confronta con la fonte e segna i vuoti. Studia solo i vuoti. Ripeti.',
+    steps:[
+      {id:'b1',label:'01 — Blurt: scarica tutto',hint:'Senza guardare nulla. Cronometrati se vuoi.',size:'xl',
+        placeholder:'Scrivi tutto quello che ricordi sull\'argomento. Definizioni, formule, esempi, connessioni. Non importa l\'ordine. Non guardare gli appunti. Vai.'},
+      {id:'b2',label:'02 — Lacune identificate',hint:'Dopo aver confrontato con la fonte',size:'',
+        placeholder:'Cosa mancava? Cosa era sbagliato? Cosa era incompleto? Elencalo con precisione.'},
+      {id:'b3',label:'03 — Correzione e completamento',hint:'Riscrivi le parti mancanti correttamente',size:'large',
+        placeholder:'Scrivi qui le parti che mancavano o erano errate, nella versione corretta. Questo è il materiale su cui concentrarti nella prossima sessione.'},
+    ],
+    aiPrompt:(topic,vals)=>`Sei un esperto del metodo Blurting. Lo studente sta ripassando: "${topic}".
+
+Ha scritto questo blurt (recupero libero da memoria):
+---
+${vals.b1||'(vuoto)'}
+---
+
+Il tuo compito, basandoti sulla conoscenza standard di questo argomento:
+1. Elenca cosa è corretto e ben ricordato (breve, solo i punti chiave)
+2. Elenca cosa manca o è incompleto (specifica cosa manca esattamente)
+3. Elenca eventuali errori o imprecisioni (con la versione corretta)
+4. Assegna un punteggio di completezza da 1 a 10 con motivazione
+
+In italiano, preciso e diretto.`
+  },
+  {
+    id:'casestudy',
+    name:'Case Method',
+    origin:'Harvard Business School',
+    tagline:'Ogni concetto diventa un problema reale da risolvere. La comprensione si prova nell\'applicazione.',
+    when:'Economia, diritto, strategia, problemi complessi',
+    color:'#5a3000',
+    desc:'Harvard non insegna teorie: insegna casi. Prendi un argomento, costruisci un caso reale intorno ad esso, analizzalo da più angolazioni, formula una risposta difendibile. Il processo è l\'apprendimento.',
+    steps:[
+      {id:'c1',label:'01 — Situazione',hint:'Il contesto del caso',size:'',
+        placeholder:'Descrivi la situazione concreta. Chi sono i protagonisti? Qual è il contesto? Quali sono i dati rilevanti?'},
+      {id:'c2',label:'02 — Problema centrale',hint:'La domanda precisa a cui rispondere',size:'',
+        placeholder:'Qual è il problema o la domanda centrale del caso? Formulalo in modo preciso. (es. "L\'azienda X deve decidere se...")'},
+      {id:'c3',label:'03 — Analisi',hint:'Almeno 2-3 prospettive diverse',size:'xl',
+        placeholder:'Analizza il problema da più angolazioni. Considera pro/contro, dati, teorie applicabili, conseguenze di diverse scelte...'},
+      {id:'c4',label:'04 — Soluzione e motivazione',hint:'La tua risposta difendibile',size:'large',
+        placeholder:'Quale soluzione proponi? Perché questa e non le altre? Quali sono i rischi residui?'},
+      {id:'c5',label:'05 — Principio estratto',hint:'La lezione generalizzabile',size:'',
+        placeholder:'Cosa impari da questo caso che si applica a situazioni simili? Qual è il principio generale?'},
+    ],
+    aiPrompt:(topic,vals)=>`Sei un professore della Harvard Business School. Lo studente ha analizzato questo caso su: "${topic}".
+
+Situazione: ${vals.c1||'(non specificata)'}
+Problema: ${vals.c2||'(non specificato)'}
+Analisi: ${vals.c3||'(non fornita)'}
+Soluzione: ${vals.c4||'(non fornita)'}
+Principio: ${vals.c5||'(non estratto)'}
+
+Il tuo compito:
+1. Valuta la qualità dell'analisi (punti di forza e debolezze)
+2. Identifica angolazioni mancanti o trascurate
+3. Sfida la soluzione proposta con una contro-argomentazione
+4. Suggerisci 2-3 domande che un professore HBS farebbe in aula
+
+Tono: diretto, esigente, didattico. In italiano.`
+  },
+  {
+    id:'conceptmap',
+    name:'Concept Map',
+    origin:'Cornell University · Joseph Novak',
+    tagline:'La conoscenza non è lineare. La mappa rivela come i concetti si connettono davvero.',
+    when:'Panoramiche, connessioni tra argomenti, preparazione esami',
+    color:'#4a1a6b',
+    desc:'Parti dal concetto centrale e costruisci rami. Ogni ramo è un\'area tematica, ogni sotto-ramo un concetto specifico. Le connessioni tra rami diversi sono il segnale della comprensione profonda.',
+    steps:null,
+    aiPrompt:(topic,vals)=>{
+      const branches = (vals.branches||[]).map((b,i)=>`Ramo ${i+1}: ${b.main||'?'} — ${b.sub||'?'}`).join('\n');
+      return `Sei un esperto di Concept Mapping. Lo studente sta mappando: "${topic}".
+
+Struttura attuale:
+${branches||'(nessun ramo ancora)'}
+
+Il tuo compito:
+1. Valuta se i rami principali coprono le aree fondamentali dell'argomento
+2. Suggerisci 2-3 rami o sotto-concetti mancanti importanti
+3. Identifica 3-5 connessioni trasversali tra rami diversi (le più importanti per la comprensione profonda)
+4. Proponi una "domanda focale" che orienta tutta la mappa
+
+In italiano, concreto e specifico per l'argomento.`;
+    }
+  },
+  {
+    id:'activerecall',
+    name:'Active Recall',
+    origin:'Cognitive Science · Hermann Ebbinghaus',
+    tagline:'La memoria non si rinforza leggendo. Si rinforza recuperando. Testa te stesso, sempre.',
+    when:'Memorizzazione, preparazione test, ripetizione spaziata',
+    color:'#1a5a5a',
+    desc:'Genera domande sull\'argomento prima ancora di studiarlo bene. Poi studia cercando le risposte. Il recupero attivo — non la rilettura passiva — è ciò che fissa la conoscenza a lungo termine.',
+    steps:null,
+    aiPrompt:(topic,vals)=>{
+      const cards = (vals.cards||[]).map((c,i)=>`Q${i+1}: ${c.q||'?'}`).join('\n');
+      return `Sei un esperto di Active Recall e Spaced Repetition. Lo studente studia: "${topic}".
+
+Domande già create:
+${cards||'(nessuna)'}
+
+Il tuo compito:
+1. Genera 8 domande aggiuntive di alta qualità sull'argomento (vari livelli: definizione, applicazione, analisi, connessione)
+2. Per le domande già esistenti, valuta se sono troppo facili o troppo vaghe e suggerisci come migliorarle
+3. Suggerisci un ordine di studio ottimale basato sulla difficoltà
+4. Proponi 2 domande "killer" che distinguono chi sa davvero da chi sa in superficie
+
+In italiano. Le domande devono essere specifiche, non generiche.`;
+    }
+  },
+];
+
+let state = { view:'home', method:null, apiKey: sessionStorage.getItem('studio_key')||'', data:{} };
+
+function updateApiIndicator(){
+  const ind = document.getElementById('api-indicator');
+  ind.className = state.apiKey ? 'ok' : '';
+  ind.title = state.apiKey ? 'API Key configurata' : 'API Key non configurata';
+}
+
+function openSettings(){
+  document.getElementById('key-input').value = state.apiKey;
+  document.getElementById('modal').style.display='flex';
+}
+function closeSettings(){ document.getElementById('modal').style.display='none'; }
+function saveKey(){
+  state.apiKey = document.getElementById('key-input').value.trim();
+  sessionStorage.setItem('studio_key', state.apiKey);
+  updateApiIndicator();
+  closeSettings();
+}
+
+function exportPDF(){
+  document.getElementById('pfooter').textContent =
+    `${state.method?.name||''} · ${state.data.topic||''} · ${new Date().toLocaleDateString('it-IT')}`;
+  setTimeout(()=>window.print(),100);
+}
+
+function goHome(){
+  state.view='home'; state.method=null; state.data={};
+  document.getElementById('home').style.display='';
+  document.getElementById('guide').style.display='none';
+  document.getElementById('workspace').style.display='none';
+  document.getElementById('back-btn').style.display='none';
+  document.getElementById('export-btn').style.display='none';
+  document.getElementById('topbar-method').textContent='Scegli un metodo';
+  document.body.style.setProperty('--card-color','var(--ink)');
+}
+
+function openMethod(id){
+  const m = METHODS.find(x=>x.id===id);
+  if(!m) return;
+  state.method=m; state.view=id; state.data={};
+  document.getElementById('home').style.display='none';
+  document.getElementById('workspace').style.display='';
+  document.getElementById('back-btn').style.display='';
+  document.getElementById('export-btn').style.display='';
+  document.getElementById('topbar-method').textContent=m.name.toUpperCase();
+  document.body.style.setProperty('--card-color', m.color);
+  renderWorkspace(m);
+}
+
+function renderWorkspace(m){
+  const ws = document.getElementById('workspace');
+  let html = `
+    <div class="ws-header">
+      <div class="ws-method-label">${m.origin}</div>
+      <div class="ws-title">${m.name}</div>
+      <div class="ws-desc">${m.desc}</div>
+    </div>
+    <div class="topic-row">
+      <div class="topic-field">
+        <div class="field-label">Argomento di studio</div>
+        <input class="topic-input" id="topic-input" placeholder="es. Il bilancio riclassificato, La globalizzazione, Pirandello..." oninput="state.data.topic=this.value">
+      </div>
+    </div>`;
+
+  if(m.id==='feynman'||m.id==='blurting'||m.id==='casestudy'){
+    m.steps.forEach(s=>{
+      html+=`<div class="study-block">
+        <div class="block-header">
+          <span class="block-num">${s.id.toUpperCase()}</span>
+          <span class="block-title">${s.label}</span>
+          <span class="block-hint">${s.hint}</span>
+        </div>
+        <textarea class="study-textarea ${s.size}" id="${s.id}" placeholder="${s.placeholder}"
+          oninput="state.data['${s.id}']=this.value"></textarea>
+      </div>`;
+    });
+  } else if(m.id==='cornell'){
+    html+=`
+    <div class="study-block">
+      <div class="block-header"><span class="block-num">01</span><span class="block-title">Domande-cue + Appunti</span><span class="block-hint">Sinistra: domande · Destra: appunti completi</span></div>
+      <div class="cornell-head">
+        <div class="ch-cell"><div class="ch-cell-label">Cue / Domande (← sinistra)</div></div>
+        <div class="ch-cell"><div class="ch-cell-label">Appunti (→ destra)</div></div>
+      </div>
+      <div class="cornell-grid" id="cornell-rows">
+        ${[1,2,3,4].map(i=>`
+        <div class="cornell-cell cue"><textarea class="fc-input" placeholder="Domanda o parola chiave..." oninput="setCornell(${i},'cue',this.value)"></textarea></div>
+        <div class="cornell-cell"><textarea class="fc-input" style="min-height:80px" placeholder="Appunti su questo punto..." oninput="setCornell(${i},'note',this.value)"></textarea></div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="study-block">
+      <div class="block-header"><span class="block-num">02</span><span class="block-title">Riepilogo finale</span><span class="block-hint">In 4-6 frasi, tutto l'essenziale</span></div>
+      <div class="cornell-summary">
+        <textarea class="study-textarea" id="cornell-summary" placeholder="Scrivi qui il riepilogo dell'intera sessione di appunti..." style="min-height:90px;border:none;background:transparent;outline:none;width:100%;" oninput="state.data.summary=this.value"></textarea>
+      </div>
+    </div>`;
+    state.data.cornellRows={};
+    state.data.notes='';
+  } else if(m.id==='conceptmap'){
+    state.data.branches=[{main:'',sub:''},{main:'',sub:''},{main:'',sub:''},{main:'',sub:''}];
+    html+=`
+    <div class="study-block">
+      <div class="block-header"><span class="block-num">01</span><span class="block-title">Concetto centrale</span></div>
+      <textarea class="study-textarea" id="cm-center" placeholder="Definisci il concetto centrale in 1-2 frasi." oninput="state.data.center=this.value"></textarea>
+    </div>
+    <div class="study-block">
+      <div class="block-header"><span class="block-num">02</span><span class="block-title">Rami principali</span><span class="block-hint">Titolo del ramo + concetti/esempi sotto</span></div>
+      <div id="branch-list">
+        ${[0,1,2,3].map(i=>branchHtml(i)).join('')}
+      </div>
+      <button class="add-card-btn print-hide" onclick="addBranch()">+ Aggiungi ramo</button>
+    </div>
+    <div class="study-block">
+      <div class="block-header"><span class="block-num">03</span><span class="block-title">Connessioni trasversali</span><span class="block-hint">Dove si collegano rami diversi?</span></div>
+      <textarea class="study-textarea" id="cm-links" placeholder="es. Il ramo 'Costi' si collega al ramo 'Risultato' attraverso il margine operativo..." oninput="state.data.links=this.value"></textarea>
+    </div>`;
+  } else if(m.id==='activerecall'){
+    state.data.cards=[{q:'',a:'',conf:0},{q:'',a:'',conf:0},{q:'',a:'',conf:0},{q:'',a:'',conf:0}];
+    html+=`
+    <div class="study-block">
+      <div class="block-header"><span class="block-num">01</span><span class="block-title">Note di base</span><span class="block-hint">Breve overview dell'argomento</span></div>
+      <textarea class="study-textarea" id="ar-notes" placeholder="Scrivi una breve panoramica dell'argomento (opzionale — serve all'AI per generare domande migliori)." oninput="state.data.notes=this.value"></textarea>
+    </div>
+    <div class="study-block">
+      <div class="block-header"><span class="block-num">02</span><span class="block-title">Domande & Risposte</span><span class="block-hint">Conf. = quanto sei sicuro (1-5)</span></div>
+      <div class="flashcard-list" id="card-list">
+        ${state.data.cards.map((_,i)=>cardHtml(i)).join('')}
+      </div>
+      <button class="add-card-btn print-hide" onclick="addCard()">+ Aggiungi domanda</button>
+    </div>`;
+  }
+
+  // AI ZONE
+  html+=`
+  <div class="ai-zone print-hide">
+    <div class="ai-zone-header">
+      <span class="ai-zone-title">Assistenza AI — ${m.name}</span>
+      <button class="tb-btn primary" onclick="runAI()">Analizza con AI →</button>
+    </div>
+    ${!state.apiKey?`<div class="api-key-zone">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3)">API Key:</span>
+      <input class="api-key-input" id="inline-key" type="password" placeholder="sk-ant-...">
+      <button class="tb-btn" onclick="saveInlineKey()">OK</button>
+    </div>`:''}
+    <div class="ai-output" id="ai-out">L'AI analizzerà il tuo lavoro e fornirà feedback, lacune identificate e domande Socratiche per approfondire.</div>
+  </div>
+
+  <div class="result-zone" id="result-zone" style="display:none">
+    <div class="rz-header"><div class="rz-title">Output — Pronto per PDF</div></div>
+    <div class="rz-body"><div class="rz-output" id="rz-out"></div></div>
+  </div>`;
+
+  ws.innerHTML = html;
+}
+
+function branchHtml(i){
+  return `<div class="concept-branch" id="branch-${i}">
+    <div class="cb-header">
+      <span class="cb-num">Ramo ${i+1}</span>
+      <input class="cb-input" placeholder="Nome del ramo principale..." oninput="setBranch(${i},'main',this.value)">
+    </div>
+    <div class="cb-body">
+      <textarea class="cb-sub" placeholder="Concetti, esempi, definizioni che appartengono a questo ramo..." oninput="setBranch(${i},'sub',this.value)"></textarea>
+    </div>
+  </div>`;
+}
+
+function cardHtml(i){
+  return `<div class="flashcard" id="card-${i}">
+    <div class="flashcard-row">
+      <div class="fc-cell">
+        <div class="fc-label">Domanda</div>
+        <textarea class="fc-input" placeholder="Cosa succede quando...? Definisci...? Qual è la differenza tra...?" oninput="setCard(${i},'q',this.value)"></textarea>
+      </div>
+      <div class="fc-cell">
+        <div class="fc-label">Risposta</div>
+        <textarea class="fc-input" placeholder="Risposta completa..." oninput="setCard(${i},'a',this.value)"></textarea>
+      </div>
+      <div class="fc-cell">
+        <div class="fc-label">Conf.</div>
+        <div class="fc-conf">
+          ${[1,2,3,4,5].map(n=>`<button class="conf-btn" id="conf-${i}-${n}" onclick="setConf(${i},${n})">${n}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function addBranch(){
+  if(!state.data.branches) state.data.branches=[];
+  const i = state.data.branches.length;
+  state.data.branches.push({main:'',sub:''});
+  const list = document.getElementById('branch-list');
+  const div = document.createElement('div');
+  div.innerHTML = branchHtml(i);
+  list.appendChild(div.firstElementChild);
+}
+function setBranch(i,k,v){
+  if(!state.data.branches) state.data.branches=[];
+  if(!state.data.branches[i]) state.data.branches[i]={};
+  state.data.branches[i][k]=v;
+}
+
+function addCard(){
+  if(!state.data.cards) state.data.cards=[];
+  const i = state.data.cards.length;
+  state.data.cards.push({q:'',a:'',conf:0});
+  const list = document.getElementById('card-list');
+  const div = document.createElement('div');
+  div.innerHTML = cardHtml(i);
+  list.appendChild(div.firstElementChild);
+}
+function setCard(i,k,v){
+  if(!state.data.cards[i]) state.data.cards[i]={};
+  state.data.cards[i][k]=v;
+}
+function setConf(i,n){
+  if(!state.data.cards[i]) state.data.cards[i]={};
+  state.data.cards[i].conf=n;
+  for(let x=1;x<=5;x++){
+    const b=document.getElementById(`conf-${i}-${x}`);
+    if(b) b.className='conf-btn'+(x<=n?' active':'');
+  }
+}
+function setCornell(i,k,v){
+  if(!state.data.cornellRows) state.data.cornellRows={};
+  if(!state.data.cornellRows[i]) state.data.cornellRows[i]={};
+  state.data.cornellRows[i][k]=v;
+  state.data.notes = Object.values(state.data.cornellRows).map(r=>r.note||'').join('\n');
+}
+
+function saveInlineKey(){
+  const k = document.getElementById('inline-key')?.value?.trim();
+  if(k){ state.apiKey=k; sessionStorage.setItem('studio_key',k); updateApiIndicator(); runAI(); }
+}
+
+async function runAI(){
+  if(!state.apiKey){ openSettings(); return; }
+  if(!state.method) return;
+  const topic = document.getElementById('topic-input')?.value || state.data.topic || 'argomento non specificato';
+  state.data.topic = topic;
+
+  const outEl = document.getElementById('ai-out');
+  outEl.className='ai-output loading';
+  outEl.textContent='Analisi in corso...';
+
+  const prompt = state.method.aiPrompt(topic, state.data);
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':state.apiKey,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    if(data.error){ outEl.className='ai-output'; outEl.textContent='Errore: '+data.error.message; return; }
+    const text = data.content?.map(c=>c.text||'').join('')||'Nessuna risposta.';
+    outEl.className='ai-output';
+    outEl.textContent=text;
+
+    const rz = document.getElementById('result-zone');
+    const rzOut = document.getElementById('rz-out');
+    rz.style.display='';
+    rzOut.textContent = `ARGOMENTO: ${topic}\nMETODO: ${state.method.name}\nDATA: ${new Date().toLocaleDateString('it-IT')}\n\n${'─'.repeat(60)}\n\nANALISI AI:\n\n${text}`;
+  } catch(e){
+    outEl.className='ai-output'; outEl.textContent='Errore di rete: '+e.message;
+  }
+}
+
+function openGuide(){
+  state.view='guide';
+  document.getElementById('home').style.display='none';
+  document.getElementById('guide').style.display='';
+  document.getElementById('workspace').style.display='none';
+  document.getElementById('back-btn').style.display='';
+  document.getElementById('export-btn').style.display='';
+  document.getElementById('topbar-method').textContent='GUIDA ALL\'USO';
+  document.body.style.setProperty('--card-color','#555');
+  renderGuide();
+}
+
+const GUIDE_TOPIC = 'Il ciclo dell\'acqua';
+
+const GUIDE_DATA = {
+  feynman:{
+    s1:`Il sole scalda l'acqua del mare e dei fiumi. L'acqua calda si trasforma in vapore — diventa invisibile e leggera, e sale in alto nell'aria. Quando il vapore sale, fa sempre più freddo. Il freddo trasforma il vapore in tante piccole goccioline — e quelle goccioline insieme formano le nuvole. Quando le goccioline si uniscono e diventano pesanti, cadono come pioggia. L'acqua torna al mare e ai fiumi, e tutto ricomincia.`,
+    s1why:`Hai scritto senza usare termini tecnici. Se non riesci a dire "evaporazione" con parole normali, non la sai davvero.`,
+    s2:`— Non so spiegare perché il vapore sale (è più leggero dell'aria? perché?)
+— Non ho spiegato cosa succede esattamente quando fa freddo
+— Non ho detto nulla sull'acqua che va nel terreno
+— Non so perché la pioggia è acqua dolce se il mare è salato`,
+    s2why:`Questi sono i tuoi veri vuoti. Non "ho studiato poco" — hai identificato COSA studiare esattamente.`,
+    s3:`Il sole fornisce energia per l'evaporazione: le molecole d'acqua acquistano energia cinetica sufficiente per sfuggire dalla superficie liquida e diventare vapore (H₂O gassoso). Il vapore è meno denso dell'aria calda e sale in quota. In quota la temperatura cala → condensazione: il vapore torna liquido attorno a microscopici nuclei di polvere, formando goccioline che aggregandosi creano le nuvole. Quando le gocce raggiungono massa critica → precipitazione (pioggia, neve, grandine). Il sale rimane in mare: durante l'evaporazione solo le molecole H₂O evaporano — l'acqua piovana è quindi dolce. L'acqua che tocca terra si divide: parte ruscella in superficie → fiumi → mare; parte si infiltra nel suolo → falde acquifere. Il ciclo è chiuso e continuo.`,
+    s3why:`Ora hai tutto. Evaporazione, condensazione, precipitazione, perché l'acqua è dolce, le falde. Se puoi spiegarlo così, lo sai.`
+  },
+  cornell:{
+    rows:[
+      {cue:`Cos'è l'evaporazione?`, note:`Trasformazione dell'acqua da liquido a vapore per effetto del calore solare. Avviene su mari, laghi, fiumi e suolo umido.`},
+      {cue:`Dove avviene la condensazione?`, note:`In quota, dove la temperatura è più bassa. Il vapore si trasforma in microscopiche goccioline d'acqua attorno a particelle di polvere → formazione delle nuvole.`},
+      {cue:`Cos'è la precipitazione?`, note:`Caduta dell'acqua dall'atmosfera: pioggia, neve, grandine. Avviene quando le goccioline in nuvola raggiungono massa sufficiente.`},
+      {cue:`Perché la pioggia è dolce?`, note:`Il sale non evapora: durante l'evaporazione solo le molecole H₂O si distaccano. I sali rimangono nel mare.`},
+      {cue:`Cosa succede all'acqua dopo la pioggia?`, note:`Due percorsi: (1) ruscellamento superficiale → fiumi → mare; (2) infiltrazione nel suolo → falde acquifere. Lenta risalita capillare o utilizzo da parte delle piante (traspirazione).`},
+    ],
+    summary:`Il ciclo dell'acqua è un sistema chiuso alimentato dall'energia solare: l'evaporazione porta l'acqua dalla superficie all'atmosfera, la condensazione la trasforma in nuvole, le precipitazioni la riportano a terra. Il sale rimane in mare. L'acqua dolce si distribuisce su tutto il pianeta attraverso fiumi, piogge e falde acquifere.`
+  },
+  blurting:{
+    b1:`Il sole scalda l'acqua e evapora. Il vapore sale in alto. Si raffredda e forma le nuvole per condensazione. Poi piove. L'acqua torna al mare. Anche le piante traspirano acqua. I fiumi portano l'acqua al mare. I ghiacciai sono riserve di acqua dolce.`,
+    b1why:`Blurt scritto in 3 minuti a libro chiuso. Nota: è disordinato, incompleto, ma onesto. Questo è corretto.`,
+    b2:`✗ Mancante: perché il vapore sale (densità/temperatura)
+✗ Mancante: la percolazione e le falde acquifere
+✗ Mancante: differenza tra evaporazione ed evapotraspirazione
+✗ Mancante: il ruolo dei nuclei di condensazione nella formazione delle nuvole
+✗ Impreciso: ho detto "si raffredda e forma nuvole" ma non ho spiegato la condensazione attorno a particelle`,
+    b2why:`Questi sono esattamente i concetti su cui devi tornare. Non rileggere tutto il capitolo — solo questi punti.`,
+    b3:`Aggiunto: Il vapore sale perché a temperature più alte ha densità minore dell'aria circostante.
+Aggiunto: Dopo la pioggia, parte dell'acqua infiltra nel suolo (percolazione) → ricarica le falde acquifere.
+Aggiunto: Evapotraspirazione = evaporazione dal suolo + traspirazione delle piante.
+Corretto: La condensazione avviene attorno a nuclei di condensazione (polvere, aerosol) — senza di essi il vapore non si trasforma in goccioline visibili.`
+  },
+  casestudy:{
+    c1:`La Sicilia ha subito tre anni consecutivi di siccità (2021-2023). Le riserve idriche degli invasi sono al 28% della capacità. L'agricoltura rappresenta l'80% del consumo idrico regionale. I pozzi privati si stanno esaurendo. Il cambiamento climatico prevede precipitazioni ridotte del 15-20% entro il 2050.`,
+    c2:`Come può la regione Sicilia garantire l'approvvigionamento idrico per i prossimi 10 anni, considerando che il ciclo naturale dell'acqua non è più sufficiente a soddisfare la domanda?`,
+    c3:`LATO DOMANDA (riduzione consumo):
+— L'agricoltura consuma l'80% dell'acqua. Passare da irrigazione a pioggia a irrigazione a goccia riduce il consumo del 40-60%.
+— Incentivi economici per colture a basso fabbisogno idrico (mandorle, ulivi vs cereali).
+
+LATO OFFERTA (aumento disponibilità):
+— Dissalatori: tecnologia matura, costo in calo con energia solare. Israele copre il 70% del fabbisogno così.
+— Raccolta acqua piovana a livello domestico e industriale.
+— Riforestazione: le foreste aumentano la percolazione e riducono l'evaporazione dal suolo.
+
+VINCOLI:
+— Costi iniziali elevati (dissalatori: ~200M€)
+— Tempi di costruzione (3-5 anni)
+— Resistenza degli agricoltori al cambiamento`,
+    c4:`Priorità immediata (0-2 anni): obbligatorietà dell'irrigazione a goccia per le nuove concessioni + incentivi per conversione. Stima riduzione consumo: 30%.
+Medio termine (2-5 anni): 2 dissalatori solari nelle aree costiere più critiche.
+Lungo termine (5-10 anni): riforestazione delle aree montane per aumentare la ricarica delle falde.
+Rischio residuo: i tempi sono lunghi rispetto all'urgenza. Serve un piano di emergenza con razionamento progressivo.`,
+    c5:`I sistemi naturali come il ciclo dell'acqua hanno una capacità massima. Quando la domanda umana supera questa capacità, le soluzioni devono agire contemporaneamente su domanda E offerta, non solo su una delle due. Il modello di successo (Israele, Spagna meridionale) combina sempre efficienza + nuova disponibilità.`
+  },
+  conceptmap:{
+    center:`Il ciclo dell'acqua è il movimento continuo dell'acqua tra idrosfera (mari, fiumi, ghiacciai), atmosfera e litosfera (suolo, falde), alimentato dall'energia solare.`,
+    branches:[
+      {main:`Evaporazione`, sub:`Motore: energia solare\nFonti: superfici marine (86%), lacustri, fluviali, suolo\nEvapotraspirazione: contributo delle piante\nCondizione: T > punto di ebollizione delle molecole superficiali`},
+      {main:`Atmosfera e condensazione`, sub:`Vapore sale in quota: densità minore dell'aria fredda\nCondensazione attorno a nuclei (polvere, aerosol)\nFormazione nuvole: aggregazione goccioline\nTipi: cumuli, cirri, strati — diversa altitudine`},
+      {main:`Precipitazioni`, sub:`Pioggia: goccioline aggregate > massa critica\nNeve: condensazione sotto 0°C\nGrandine: correnti ascensionali in temporale\nDistribuzione: legata a vento, rilievi, stagioni`},
+      {main:`Ciclo terrestre`, sub:`Ruscellamento: acqua in superficie → fiumi → mare\nInfiltrazione: percolazione nel suolo → falde acquifere\nGhiacciai: riserve a lungo rilascio\nRisalita capillare + traspirazione vegetale`},
+    ],
+    links:`Ramo 1 ↔ Ramo 4: l'evaporazione dipende dall'acqua disponibile in superficie (Ramo 4 alimenta Ramo 1)\nRamo 2 ↔ Ramo 3: l'altitudine delle nuvole determina il tipo di precipitazione\nRamo 3 ↔ Ramo 4: le precipitazioni alimentano sia il ruscellamento che la percolazione\nConnessione trasversale chiave: senza falde acquifere (R4), la stagione secca spezzerebbe il ciclo`
+  },
+  activerecall:{
+    notes:`Il ciclo dell'acqua (ciclo idrologico) è il percorso continuo dell'acqua attraverso evaporazione, condensazione e precipitazione. È alimentato dall'energia solare e dalla gravità. Redistribuisce acqua dolce sul pianeta.`,
+    cards:[
+      {q:`Qual è la fonte di energia primaria del ciclo dell'acqua?`, a:`Il sole (energia solare). Senza di essa non avverrebbe l'evaporazione che alimenta tutto il ciclo.`, conf:5},
+      {q:`Cosa succede al sale durante l'evaporazione dell'acqua di mare?`, a:`Rimane nel mare. Solo le molecole H₂O evaporano. Ecco perché la pioggia è acqua dolce anche se viene dal mare.`, conf:5},
+      {q:`Definisci condensazione e distinguila dall'evaporazione.`, a:`Evaporazione: liquido → vapore (richiede calore). Condensazione: vapore → liquido (avviene con raffreddamento). Processi inversi.`, conf:4},
+      {q:`Cos'è la percolazione e dove porta l'acqua?`, a:`È l'infiltrazione dell'acqua nel suolo attraverso la roccia porosa. Porta alla ricarica delle falde acquifere sotterranee.`, conf:3},
+      {q:`Perché i ghiacciai sono importanti nel ciclo idrologico?`, a:`Sono riserve di acqua dolce a lungo termine. Il loro scioglimento graduale alimenta i fiumi nella stagione secca.`, conf:4},
+      {q:`Qual è la differenza tra evaporazione ed evapotraspirazione?`, a:`Evapotraspirazione = evaporazione dal suolo + traspirazione delle piante. Le foreste contribuiscono significativamente al vapore atmosferico.`, conf:3},
+    ]
+  }
+};
+
+function renderGuide(){
+  const g = document.getElementById('guide');
+  let html = `
+    <div class="guide-header">
+      <div class="guide-kicker">Come usare ogni metodo — guida pratica</div>
+      <div class="guide-title">Vedi come funziona,<br>poi applicalo ai tuoi argomenti.</div>
+      <div class="guide-sub">Ogni metodo è mostrato completamente compilato su un argomento semplice. Leggi cosa va scritto in ogni campo, perché va scritto così, e cosa fa l'AI sopra.</div>
+      <div class="guide-topic-badge"><span class="gtb-label">Argomento esempio</span><span class="gtb-sep" style="color:var(--border);margin:0 6px">·</span><span class="gtb-val">${GUIDE_TOPIC}</span></div>
+    </div>`;
+
+  // 1 — FEYNMAN
+  html += guideMethod('feynman','#1a3a6b',`
+    <div class="gm-how">
+      <strong>Come si usa:</strong> Prima scrivi senza guardare nulla. Poi identifichi dove ti sei bloccato. Poi torni alla fonte, colmi i vuoti, e riscrivi. Il test finale: puoi spiegarlo senza inciampare?
+    </div>
+    <div class="gm-body">
+      ${gs('01','Spiega semplicemente','→ scrivi senza termini tecnici, come se parlassi a un ragazzo di 12 anni',GUIDE_DATA.feynman.s1,GUIDE_DATA.feynman.s1why)}
+      ${gs('02','Identifica i vuoti','→ dove ti sei bloccato? cosa non hai saputo spiegare?',GUIDE_DATA.feynman.s2,GUIDE_DATA.feynman.s2why)}
+      ${gs('03','Versione raffinata','→ dopo aver studiato i vuoti, riscrivi tutto correttamente',GUIDE_DATA.feynman.s3,GUIDE_DATA.feynman.s3why)}
+      ${guideAiBox('feynman','L\'AI legge la tua spiegazione semplice, identifica le lacune reali con precisione, e ti fa domande Socratiche per ogni lacuna — così arrivi alla risposta da solo invece di leggerla passivamente.')}
+    </div>
+  `);
+
+  // 2 — CORNELL
+  html += guideMethod('cornell','#7a1e1e',`
+    <div class="gm-how">
+      <strong>Come si usa:</strong> Mentre studi, scrivi a destra gli appunti completi. Poi — subito dopo — scrivi a sinistra le domande che sintetizzano ogni blocco. In basso il riepilogo. Per ripetere, copri la colonna destra e rispondi alle domande.
+    </div>
+    <div class="gm-body">
+      <div class="guide-step">
+        <div class="gs-head"><span class="gs-num">01</span><span class="gs-label">Domande-cue + Appunti</span><span class="gs-why">→ la colonna sinistra diventa il tuo quiz di revisione</span></div>
+        <div class="guide-cornell-demo">
+          <div class="gcd-head">
+            <div class="gcd-th">Cue / Domanda (sinistra)</div>
+            <div class="gcd-th">Appunti (destra)</div>
+          </div>
+          ${GUIDE_DATA.cornell.rows.map(r=>`<div class="gcd-row"><div class="gcd-cue">${r.cue}</div><div class="gcd-note">${r.note}</div></div>`).join('')}
+        </div>
+        <div class="gs-annotation">La colonna sinistra deve contenere domande brevi e incisive, non riassunti. Serviranno a interrogarti: copri la destra, leggi la domanda, rispondi a mente, scopri.</div>
+      </div>
+      <div class="guide-step">
+        <div class="gs-head"><span class="gs-num">02</span><span class="gs-label">Riepilogo finale</span><span class="gs-why">→ 4-6 frasi che catturano tutto l'essenziale</span></div>
+        <div class="gs-content">${GUIDE_DATA.cornell.summary}</div>
+        <div class="gs-annotation">Il riepilogo si scrive a mente, dopo aver preso gli appunti. Non copia gli appunti — sintetizza. Se non riesci a scriverlo, non hai ancora capito la struttura dell'argomento.</div>
+      </div>
+      ${guideAiBox('cornell','L\'AI genera le domande-cue automaticamente dagli appunti. Utile quando hai fretta o quando vuoi domande più profonde di quelle che ti vengono in mente. Ti dà anche il riepilogo e le connessioni con altri argomenti.')}
+    </div>
+  `);
+
+  // 3 — BLURTING
+  html += guideMethod('blurting','#2a6b3a',`
+    <div class="gm-how">
+      <strong>Come si usa:</strong> Chiudi tutto. Cronometrati (5-10 min). Scrivi tutto quello che ricordi senza fermarti. Poi apri il libro e confronta. Studia SOLO i vuoti trovati. Ripeti finché il blurt è completo.
+    </div>
+    <div class="gm-body">
+      ${gs('01','Blurt — scarica tutto','→ libro chiuso, senza fermarti, anche disordinato',GUIDE_DATA.blurting.b1,GUIDE_DATA.blurting.b1why)}
+      ${gs('02','Lacune identificate','→ dopo aver confrontato con la fonte',GUIDE_DATA.blurting.b2,GUIDE_DATA.blurting.b2why)}
+      ${gs('03','Correzione e completamento','→ scrivi le parti mancanti correttamente',GUIDE_DATA.blurting.b3,'')}
+      ${guideAiBox('blurting','L\'AI confronta il tuo blurt con la conoscenza standard dell\'argomento. Lista ciò che è corretto, ciò che manca, ciò che è sbagliato. Ti dà un punteggio di completezza 1-10. Utile per capire quanto sei davvero pronto.')}
+    </div>
+  `);
+
+  // 4 — CASE METHOD
+  html += guideMethod('casestudy','#5a3000',`
+    <div class="gm-how">
+      <strong>Come si usa:</strong> Costruisci un caso reale attorno al concetto. Non spieghilo in astratto — applicalo a una situazione concreta, analizza da più angoli, proponi una soluzione difendibile. HBS usa questo metodo perché l'applicazione è l'unica vera prova della comprensione.
+    </div>
+    <div class="gm-body">
+      ${gs('01','Situazione','→ chi, cosa, dove, quando, dati rilevanti',GUIDE_DATA.casestudy.c1,`Più il contesto è specifico, più l'analisi diventa reale. Numeri concreti, non vaghe generalizzazioni.`)}
+      ${gs('02','Problema centrale','→ la domanda precisa, formulata in una frase',GUIDE_DATA.casestudy.c2,`La formulazione del problema è già metà dell'analisi. Se il problema è vago, l'analisi sarà vaga.`)}
+      ${gs('03','Analisi','→ almeno 2-3 angolazioni diverse, con pro/contro',GUIDE_DATA.casestudy.c3,`Il metodo HBS richiede di considerare domanda E offerta, breve E lungo termine, costi E benefici. Mai un'unica prospettiva.`)}
+      ${gs('04','Soluzione motivata','→ la tua risposta difendibile, con i rischi residui',GUIDE_DATA.casestudy.c4,`"Difendibile" significa che potresti argomentarla in aula. Non è la soluzione perfetta — è la migliore disponibile con i vincoli dati.`)}
+      ${gs('05','Principio estratto','→ la lezione generalizzabile a casi simili',GUIDE_DATA.casestudy.c5,`Questo è il vero apprendimento: non la soluzione di questo caso, ma il principio che si applica a tutti i casi simili.`)}
+      ${guideAiBox('casestudy','L\'AI valuta la qualità della tua analisi, identifica angolazioni trascurate, sfida la tua soluzione con una contro-argomentazione, e ti fa le domande che un professore HBS farebbe in aula.')}
+    </div>
+  `);
+
+  // 5 — CONCEPT MAP
+  html += guideMethod('conceptmap','#4a1a6b',`
+    <div class="gm-how">
+      <strong>Come si usa:</strong> Definisci il concetto centrale, poi costruisci i rami tematici principali con i concetti che appartengono a ciascuno. Le connessioni trasversali tra rami diversi sono il segnale della comprensione profonda — là dove la conoscenza diventa rete, non lista.
+    </div>
+    <div class="gm-body">
+      ${gs('01','Concetto centrale','→ 1-2 frasi che definiscono l\'essenza dell\'argomento',GUIDE_DATA.conceptmap.center,`Non una definizione da dizionario. Una definizione che include già le relazioni principali (cosa è, come funziona, perché esiste).`)}
+      <div class="guide-step">
+        <div class="gs-head"><span class="gs-num">02</span><span class="gs-label">Rami principali</span><span class="gs-why">→ le aree tematiche + i concetti di ciascuna</span></div>
+        <div class="guide-branches-demo">
+          ${GUIDE_DATA.conceptmap.branches.map((b,i)=>`
+            <div class="gbranch">
+              <div class="gbranch-head"><span class="gbranch-num">Ramo ${i+1}</span><span class="gbranch-main">${b.main}</span></div>
+              <div class="gbranch-body">${b.sub.replace(/\n/g,'<br>')}</div>
+            </div>`).join('')}
+        </div>
+        <div class="gs-annotation">Ogni ramo copre un'area tematica. I concetti nel corpo del ramo devono includere definizioni, esempi, condizioni. Non solo parole chiave.</div>
+      </div>
+      ${gs('03','Connessioni trasversali','→ dove i rami si parlano? questi sono i concetti più importanti',GUIDE_DATA.conceptmap.links,`Se non trovi connessioni trasversali, stai ancora studiando a compartimenti. Le connessioni sono la comprensione.`)}
+      ${guideAiBox('conceptmap','L\'AI verifica se i rami coprono l\'argomento completamente, suggerisce rami o concetti mancanti, e identifica le connessioni trasversali più importanti che potresti non aver visto.')}
+    </div>
+  `);
+
+  // 6 — ACTIVE RECALL
+  html += guideMethod('activerecall','#1a5a5a',`
+    <div class="gm-how">
+      <strong>Come si usa:</strong> Crea domande prima ancora di sapere tutte le risposte. Studia cercando le risposte. Assegna una confidenza 1-5. Studia prima le domande con confidenza bassa. Ripeti dopo 1 giorno, 3 giorni, 1 settimana (curva dell'oblio di Ebbinghaus).
+    </div>
+    <div class="gm-body">
+      ${gs('01','Note di base','→ panoramica breve — serve all\'AI per generare domande migliori',GUIDE_DATA.activerecall.notes,`Non servono appunti completi. Solo la panoramica dell'argomento per orientare le domande.`)}
+      <div class="guide-step">
+        <div class="gs-head"><span class="gs-num">02</span><span class="gs-label">Domande & Risposte</span><span class="gs-why">→ conf. 1-5: quanto sei sicuro di questa risposta?</span></div>
+        <div class="guide-cards-demo">
+          <div style="display:grid;grid-template-columns:1fr 1fr 60px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;">
+            <div class="gcard-cell"><div class="gcard-label">Domanda</div></div>
+            <div class="gcard-cell"><div class="gcard-label">Risposta</div></div>
+            <div class="gcard-cell"><div class="gcard-label">Conf.</div></div>
+          </div>
+          ${GUIDE_DATA.activerecall.cards.map(c=>`
+            <div class="gcard">
+              <div class="gcard-cell"><div class="gcard-text">${c.q}</div></div>
+              <div class="gcard-cell"><div class="gcard-text">${c.a}</div></div>
+              <div class="gcard-cell"><div class="gcard-conf" style="color:var(--gm-color)">${c.conf}/5</div></div>
+            </div>`).join('')}
+        </div>
+        <div class="gs-annotation">Le domande con confidenza 3 o meno sono quelle da studiare adesso. Quelle con 5 le rivedi tra una settimana. Questo è il nucleo della ripetizione spaziata.</div>
+      </div>
+      ${guideAiBox('activerecall','L\'AI genera 8 domande aggiuntive di qualità crescente (definizione → applicazione → analisi → connessione), valuta le tue domande esistenti, e propone 2 domande "killer" che separano chi sa davvero da chi sa in superficie.')}
+    </div>
+  `);
+
+  html += `<div style="text-align:center;padding:20px 0 40px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);">Fine guida · <span style="cursor:pointer;text-decoration:underline" onclick="goHome()">Torna ai metodi</span></div>`;
+
+  g.innerHTML = html;
+}
+
+function guideMethod(id, color, bodyHtml){
+  const m = METHODS.find(x=>x.id===id);
+  return `<div class="guide-method" style="--gm-color:${color}">
+    <div class="gm-header">
+      <div class="gm-left">
+        <div class="gm-origin">${m.origin}</div>
+        <div class="gm-name">${m.name}</div>
+        <div class="gm-tagline">${m.tagline}</div>
+      </div>
+      <div>
+        <div class="gm-badge">Quando: ${m.when}</div>
+        <button class="tb-btn" style="margin-top:8px;width:100%" onclick="openMethod('${id}')">Usa ora →</button>
+      </div>
+    </div>
+    ${bodyHtml}
+  </div>`;
+}
+
+function gs(num, label, why, content, annotation){
+  return `<div class="guide-step">
+    <div class="gs-head"><span class="gs-num">${num}</span><span class="gs-label">${label}</span><span class="gs-why">${why}</span></div>
+    <div class="gs-content">${content.replace(/\n/g,'<br>')}</div>
+    ${annotation?`<div class="gs-annotation">${annotation}</div>`:''}
+  </div>`;
+}
+
+function guideAiBox(id, desc){
+  return `<div style="background:var(--bg3);border:1px solid var(--border);padding:14px 16px;margin-top:8px;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;">Cosa fa l'AI su questo metodo</div>
+    <div style="font-size:12px;color:var(--ink2);line-height:1.7">${desc}</div>
+  </div>`;
+}
+
+
+function renderHome(){
+  const home = document.getElementById('home');
+  home.innerHTML = `
+    <div class="home-header">
+      <div class="home-title">Metodi di Studio</div>
+      <div class="home-sub">
+        6 metodi didattici dalle migliori università al mondo — Feynman, Cornell, Oxford, Harvard.
+        Scegli il metodo, studia l'argomento, ottieni feedback AI, esporta il PDF.
+        <br><br>
+        Per l'AI: imposta la tua <a onclick="openSettings()">Anthropic API Key</a>.
+      </div>
+    </div>
+    <div class="methods-grid">
+      <div class="method-card" style="--card-color:#333;grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;padding:20px 24px" onclick="openGuide()">
+        <div>
+          <div class="mc-origin">Come funziona tutto · Esempio completo</div>
+          <div class="mc-name" style="font-size:17px">Guida all'uso — tutti i metodi spiegati e compilati</div>
+          <div class="mc-tagline" style="margin-bottom:0">Vedi ogni metodo compilato sul ciclo dell'acqua, con annotazioni su cosa scrivere, perché, e cosa fa l'AI.</div>
+        </div>
+        <div style="font-size:22px;color:var(--border);flex-shrink:0;margin-left:20px">→</div>
+      </div>
+      ${METHODS.map(m=>`
+        <div class="method-card" style="--card-color:${m.color}" onclick="openMethod('${m.id}')">
+          <div class="mc-origin">${m.origin}</div>
+          <div class="mc-name">${m.name}</div>
+          <div class="mc-tagline">${m.tagline}</div>
+          <div class="mc-when-label">Quando usarlo</div>
+          <div class="mc-when">${m.when}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+renderHome();
+updateApiIndicator();
+</script>
+</body>
+</html>

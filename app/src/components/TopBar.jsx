@@ -1,0 +1,51 @@
+export default function TopBar({ view, method, apiKey, onHome, onOpenSettings, onExportPDF }) {
+  const isWorkspaceOrGuide = view === 'workspace' || view === 'guide'
+  const methodLabel =
+    view === 'guide'
+      ? 'GUIDA ALL\'USO'
+      : method
+      ? method.name.toUpperCase()
+      : 'Scegli un metodo'
+
+  return (
+    <div className="fixed top-0 left-0 right-0 h-[52px] bg-app-white border-b border-border flex items-center px-7 gap-4 z-[100]">
+      <button
+        className="font-mono text-[13px] font-medium tracking-[0.05em] hover:opacity-60 transition-opacity bg-transparent border-0 p-0 text-ink"
+        onClick={onHome}
+      >
+        STUDIO
+      </button>
+      <span className="text-border text-[18px]">·</span>
+      <span className="font-mono text-[11px] text-ink3 tracking-[0.1em] uppercase">{methodLabel}</span>
+
+      <div className="ml-auto flex gap-2.5 items-center">
+        <div
+          title={apiKey ? 'API Key configurata' : 'API Key non configurata'}
+          className={`w-2 h-2 rounded-full ${apiKey ? 'bg-[#2a7a4e]' : 'bg-border'}`}
+        />
+        <button
+          className="print-hide border border-border bg-transparent px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase text-ink2 hover:border-ink hover:text-ink hover:bg-bg transition-all"
+          onClick={onOpenSettings}
+        >
+          API Key
+        </button>
+        {isWorkspaceOrGuide && (
+          <button
+            className="print-hide border border-border bg-transparent px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase text-ink2 hover:border-ink hover:text-ink hover:bg-bg transition-all"
+            onClick={onHome}
+          >
+            ← Home
+          </button>
+        )}
+        {view === 'workspace' && (
+          <button
+            className="print-hide border border-ink bg-ink text-app-white px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase hover:bg-[#333] transition-colors"
+            onClick={onExportPDF}
+          >
+            Esporta PDF
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
