@@ -99,6 +99,14 @@ button {
     display: none !important;
   }
 
+  /* Kill the fixed topbar entirely — no space, no overlay */
+  nav, header, [class*='fixed'] {
+    position: static !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+  }
+
   /* ── Page setup ── */
   @page {
     size: A4;

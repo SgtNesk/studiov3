@@ -195,7 +195,7 @@ export default function App() {
         onLibrary={goToLibrary}
       />
 
-      <div className="pt-[52px] min-h-screen">
+      <div className="pt-[52px] print:pt-0 min-h-screen">
         {view === 'home' && (
           <Home
             methods={METHODS}

@@ -25,7 +25,7 @@ export default function TopBar({
     : null
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-[52px] bg-app-white border-b border-border flex items-center px-7 gap-4 z-[100]">
+    <div className="print-hide fixed top-0 left-0 right-0 h-[52px] bg-app-white border-b border-border flex items-center px-7 gap-4 z-[100]">
       <button
         className="font-mono text-[13px] font-medium tracking-[0.05em] hover:opacity-60 transition-opacity bg-transparent border-0 p-0 text-ink"
         onClick={onHome}
