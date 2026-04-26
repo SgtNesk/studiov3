@@ -175,6 +175,11 @@ export default function App() {
     setTimeout(() => window.print(), 100)
   }
 
+  const printFooterText =
+    method && view === 'workspace'
+      ? `${method.name} · ${data.topic || 'Sessione di studio'} · ${new Date().toLocaleDateString('it-IT')}`
+      : ''
+
   return (
     <div className="min-h-screen bg-bg text-ink text-sm font-sans">
       <TopBar
@@ -228,6 +233,9 @@ export default function App() {
           onClose={() => setShowSettings(false)}
         />
       )}
+
+      {/* Print footer — visible only on paper */}
+      <div className="print-footer">{printFooterText}</div>
     </div>
   )
 }
