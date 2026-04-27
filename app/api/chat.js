@@ -3,10 +3,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { prompt, apiKey } = req.body
+  const { prompt } = req.body
+  const apiKey = process.env.ANTHROPIC_API_KEY
 
-  if (!apiKey || !prompt) {
-    return res.status(400).json({ error: 'Missing prompt or apiKey' })
+  if (!apiKey) {
+    return res.status(500).json({ error: 'API key not configured on server' })
+  }
+
+  if (!prompt) {
+    return res.status(400).json({ error: 'Missing prompt' })
   }
 
   try {

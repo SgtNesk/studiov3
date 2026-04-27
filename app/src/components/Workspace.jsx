@@ -5,7 +5,7 @@ import ActiveRecallForm from './workspace/ActiveRecallForm'
 import AIZone from './workspace/AIZone'
 import PrintHeader from './PrintHeader'
 
-export default function Workspace({ method, data, setData, apiKey, onOpenSettings }) {
+export default function Workspace({ method, data, setData }) {
   const color = method.color
 
   const renderForm = () => {
@@ -64,8 +64,6 @@ export default function Workspace({ method, data, setData, apiKey, onOpenSetting
       <AIZone
         method={method}
         data={data}
-        apiKey={apiKey}
-        onOpenSettings={onOpenSettings}
         color={color}
       />
     </div>

@@ -5,7 +5,6 @@ import Home from './components/Home'
 import Workspace from './components/Workspace'
 import Guide from './components/Guide'
 import Library from './components/Library'
-import SettingsModal from './components/SettingsModal'
 import { getSessions, saveSession, makeSessionId } from './lib/sessions'
 
 function makeInitialData(m) {
@@ -54,8 +53,6 @@ export default function App() {
   const [view, setView] = useState('home')
   const [method, setMethod] = useState(null)
   const [data, setData] = useState({})
-  const [apiKey, setApiKey] = useState(() => sessionStorage.getItem('studio_key') || '')
-  const [showSettings, setShowSettings] = useState(false)
   const [sessionId, setSessionId] = useState(null)
   const [savedAt, setSavedAt] = useState(null)
   const [isDirty, setIsDirty] = useState(false)
@@ -165,12 +162,6 @@ export default function App() {
     setView('library')
   }
 
-  function saveApiKey(key) {
-    setApiKey(key)
-    sessionStorage.setItem('studio_key', key)
-    setShowSettings(false)
-  }
-
   function exportPDF() {
     setTimeout(() => window.print(), 100)
   }
@@ -185,11 +176,9 @@ export default function App() {
       <TopBar
         view={view}
         method={method}
-        apiKey={apiKey}
         isDirty={isDirty}
         savedAt={savedAt}
         onHome={goHome}
-        onOpenSettings={() => setShowSettings(true)}
         onExportPDF={exportPDF}
         onSave={performSave}
         onLibrary={goToLibrary}
@@ -201,7 +190,6 @@ export default function App() {
             methods={METHODS}
             onMethodClick={openMethod}
             onGuideClick={openGuide}
-            onApiKeyClick={() => setShowSettings(true)}
             onLibraryClick={goToLibrary}
           />
         )}
@@ -213,8 +201,6 @@ export default function App() {
             method={method}
             data={data}
             setData={handleSetData}
-            apiKey={apiKey}
-            onOpenSettings={() => setShowSettings(true)}
           />
         )}
         {view === 'library' && (
@@ -225,14 +211,6 @@ export default function App() {
           />
         )}
       </div>
-
-      {showSettings && (
-        <SettingsModal
-          apiKey={apiKey}
-          onSave={saveApiKey}
-          onClose={() => setShowSettings(false)}
-        />
-      )}
 
       {/* Print footer — visible only on paper */}
       <div className="print-footer">{printFooterText}</div>

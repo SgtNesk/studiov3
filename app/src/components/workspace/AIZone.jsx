@@ -1,21 +1,14 @@
 import { useState } from 'react'
 
-export default function AIZone({ method, data, apiKey, onOpenSettings, color }) {
+export default function AIZone({ method, data, color }) {
   const [output, setOutput] = useState(
     "L'AI analizzerà il tuo lavoro e fornirà feedback, lacune identificate e domande Socratiche per approfondire."
   )
   const [loading, setLoading] = useState(false)
   const [showResult, setShowResult] = useState(false)
   const [resultText, setResultText] = useState('')
-  const [inlineKey, setInlineKey] = useState('')
 
-  async function runAI(keyOverride) {
-    const key = keyOverride || apiKey
-    if (!key) {
-      onOpenSettings()
-      return
-    }
-
+  async function runAI() {
     const topic = data.topic || 'argomento non specificato'
     setLoading(true)
     setOutput('Analisi in corso...')
@@ -26,7 +19,7 @@ export default function AIZone({ method, data, apiKey, onOpenSettings, color }) 
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, apiKey: key }),
+        body: JSON.stringify({ prompt }),
       })
       const json = await res.json()
       if (json.error) {
@@ -47,14 +40,6 @@ export default function AIZone({ method, data, apiKey, onOpenSettings, color }) 
     }
   }
 
-  function saveInlineKey() {
-    const trimmed = inlineKey.trim()
-    if (trimmed) {
-      sessionStorage.setItem('studio_key', trimmed)
-      runAI(trimmed)
-    }
-  }
-
   return (
     <div className="print-hide">
       <div className="bg-bg2 border border-border p-[18px_20px] mb-6">
@@ -64,33 +49,11 @@ export default function AIZone({ method, data, apiKey, onOpenSettings, color }) 
           </span>
           <button
             className="border border-ink bg-ink text-app-white px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase hover:bg-[#333] transition-colors"
-            onClick={() => runAI()}
+            onClick={runAI}
           >
             Analizza con AI →
           </button>
         </div>
-
-        {!apiKey && (
-          <div className="bg-bg2 border border-border p-3.5 flex gap-3 items-center mb-5">
-            <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink3">
-              API Key:
-            </span>
-            <input
-              type="password"
-              placeholder="sk-ant-..."
-              value={inlineKey}
-              onChange={e => setInlineKey(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && saveInlineKey()}
-              className="flex-1 border border-border bg-app-white px-2.5 py-1.5 outline-none font-mono text-[11px] focus:border-ink transition-colors"
-            />
-            <button
-              className="border border-border bg-transparent px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase text-ink2 hover:border-ink hover:text-ink hover:bg-bg transition-all"
-              onClick={saveInlineKey}
-            >
-              OK
-            </button>
-          </div>
-        )}
 
         <div
           className={`text-[13px] leading-[1.8] whitespace-pre-wrap min-h-[60px] ${

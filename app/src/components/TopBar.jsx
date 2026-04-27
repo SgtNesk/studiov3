@@ -1,11 +1,9 @@
 export default function TopBar({
   view,
   method,
-  apiKey,
   isDirty,
   savedAt,
   onHome,
-  onOpenSettings,
   onExportPDF,
   onSave,
   onLibrary,
@@ -36,16 +34,6 @@ export default function TopBar({
       <span className="font-mono text-[11px] text-ink3 tracking-[0.1em] uppercase">{methodLabel}</span>
 
       <div className="ml-auto flex gap-2.5 items-center">
-        <div
-          title={apiKey ? 'API Key configurata' : 'API Key non configurata'}
-          className={`w-2 h-2 rounded-full ${apiKey ? 'bg-[#2a7a4e]' : 'bg-border'}`}
-        />
-        <button
-          className="print-hide border border-border bg-transparent px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase text-ink2 hover:border-ink hover:text-ink hover:bg-bg transition-all"
-          onClick={onOpenSettings}
-        >
-          API Key
-        </button>
         {view !== 'library' && (
           <button
             className="print-hide border border-border bg-transparent px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase text-ink2 hover:border-ink hover:text-ink hover:bg-bg transition-all"
