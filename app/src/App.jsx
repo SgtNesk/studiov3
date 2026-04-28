@@ -6,6 +6,7 @@ import Workspace from './components/Workspace'
 import Guide from './components/Guide'
 import Library from './components/Library'
 import { getSessions, saveSession, makeSessionId } from './lib/sessions'
+import Programma from './components/Programma'
 
 function makeInitialData(m) {
   if (m.id === 'cornell') {
@@ -162,6 +163,12 @@ export default function App() {
     setView('library')
   }
 
+  function goToProgramma() {
+    setView('programma')
+    setMethod(null)
+    setData({})
+  }
+
   function exportPDF() {
     setTimeout(() => window.print(), 100)
   }
@@ -182,6 +189,7 @@ export default function App() {
         onExportPDF={exportPDF}
         onSave={performSave}
         onLibrary={goToLibrary}
+        onProgramma={goToProgramma}
       />
 
       <div className="pt-[52px] print:pt-0 min-h-screen">
@@ -210,6 +218,7 @@ export default function App() {
             onExportPDF={exportPDFFromLibrary}
           />
         )}
+        {view === 'programma' && <Programma />}
       </div>
 
       {/* Print footer — visible only on paper */}

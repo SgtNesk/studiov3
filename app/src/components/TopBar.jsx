@@ -7,6 +7,7 @@ export default function TopBar({
   onExportPDF,
   onSave,
   onLibrary,
+  onProgramma,
 }) {
   const isWorkspaceOrGuide = view === 'workspace' || view === 'guide'
   const methodLabel =
@@ -14,6 +15,8 @@ export default function TopBar({
       ? "GUIDA ALL'USO"
       : view === 'library'
       ? 'LIBRERIA'
+      : view === 'programma'
+      ? 'PROGRAMMA'
       : method
       ? method.name.toUpperCase()
       : 'Scegli un metodo'
@@ -34,6 +37,14 @@ export default function TopBar({
       <span className="font-mono text-[11px] text-ink3 tracking-[0.1em] uppercase">{methodLabel}</span>
 
       <div className="ml-auto flex gap-2.5 items-center">
+        {view !== 'programma' && (
+          <button
+            className="print-hide border border-border bg-transparent px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase text-ink2 hover:border-ink hover:text-ink hover:bg-bg transition-all"
+            onClick={onProgramma}
+          >
+            Programma
+          </button>
+        )}
         {view !== 'library' && (
           <button
             className="print-hide border border-border bg-transparent px-3.5 py-1.5 font-mono text-[10px] tracking-[0.15em] uppercase text-ink2 hover:border-ink hover:text-ink hover:bg-bg transition-all"
