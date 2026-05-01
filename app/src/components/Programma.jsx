@@ -141,6 +141,30 @@ const PROGRAMMA = [
 ]
 
 const LS_KEY = 'studio_programma_done'
+const PROPOSAL_KEY = 'studio_programma_proposal_index'
+
+const CHALLENGES = [
+  {
+    label: 'Challenge 25 minuti',
+    task: 'Studia il nucleo dell\'argomento, poi chiudi tutto e scrivi 6 righe senza guardare.',
+    improve: 'Alla fine evidenzia il punto piu debole e trasformalo in una domanda secca.',
+  },
+  {
+    label: 'Active recall',
+    task: 'Prepara 5 domande possibili da interrogazione o verifica e rispondi a voce.',
+    improve: 'Segna una risposta incompleta e rifalla usando parole piu precise.',
+  },
+  {
+    label: 'Collegamento',
+    task: 'Trova 2 collegamenti con argomenti gia studiati o con un\'altra materia.',
+    improve: 'Rendi almeno un collegamento spiegabile in meno di 40 secondi.',
+  },
+  {
+    label: 'Mini verifica',
+    task: 'Fai uno schema essenziale: definizione, causa, conseguenza, esempio.',
+    improve: 'Togli il superfluo e lascia solo cio che useresti davvero in prova.',
+  },
+]
 
 function loadDone() {
   try {
@@ -154,8 +178,18 @@ function saveDone(done) {
   localStorage.setItem(LS_KEY, JSON.stringify(done))
 }
 
+function loadProposalIndex() {
+  const value = Number(localStorage.getItem(PROPOSAL_KEY) || 0)
+  return Number.isFinite(value) ? value : 0
+}
+
+function saveProposalIndex(index) {
+  localStorage.setItem(PROPOSAL_KEY, String(index))
+}
+
 export default function Programma() {
   const [done, setDone] = useState(loadDone)
+  const [proposalIndex, setProposalIndex] = useState(loadProposalIndex)
   const [open, setOpen] = useState(() => {
     const initial = {}
     PROGRAMMA.forEach(m => { initial[m.id] = true })
@@ -163,6 +197,7 @@ export default function Programma() {
   })
 
   useEffect(() => { saveDone(done) }, [done])
+  useEffect(() => { saveProposalIndex(proposalIndex) }, [proposalIndex])
 
   function toggleDone(materiaId, idx) {
     const key = `${materiaId}_${idx}`
@@ -173,12 +208,38 @@ export default function Programma() {
     setOpen(prev => ({ ...prev, [id]: !prev[id] }))
   }
 
+  function goToNextProposal() {
+    setProposalIndex(prev => prev + 1)
+  }
+
+  function markProposalDone(proposal) {
+    if (!proposal) return
+    setDone(prev => ({ ...prev, [proposal.key]: true }))
+    setProposalIndex(prev => prev + 1)
+  }
+
   const totalArgomenti = PROGRAMMA.reduce((acc, m) => acc + m.argomenti.length, 0)
   const totalDone = PROGRAMMA.reduce(
     (acc, m) => acc + m.argomenti.filter((_, i) => done[`${m.id}_${i}`]).length,
     0
   )
   const pct = totalArgomenti > 0 ? Math.round((totalDone / totalArgomenti) * 100) : 0
+  const pendingTopics = PROGRAMMA.flatMap(materia =>
+    materia.argomenti
+      .map((argomento, index) => ({
+        materia,
+        argomento,
+        index,
+        key: `${materia.id}_${index}`,
+      }))
+      .filter(item => !done[item.key])
+  )
+  const proposal = pendingTopics.length > 0
+    ? pendingTopics[proposalIndex % pendingTopics.length]
+    : null
+  const challenge = proposal
+    ? CHALLENGES[(proposalIndex + totalDone) % CHALLENGES.length]
+    : null
 
   return (
     <div className="max-w-[860px] mx-auto px-7 py-12">
@@ -205,6 +266,84 @@ export default function Programma() {
         <p className="text-[12px] text-ink3">
           Spunta gli argomenti man mano che li studi. Il progresso si salva automaticamente.
         </p>
+      </div>
+
+      {/* Proposta studio */}
+      <div
+        className="bg-app-white border border-border mb-8 overflow-hidden"
+        style={{ borderTopColor: proposal?.materia.colore || '#18160f', borderTopWidth: 3 }}
+      >
+        {proposal && challenge ? (
+          <div className="px-6 py-5">
+            <div className="flex items-start justify-between gap-5 mb-4">
+              <div className="min-w-0">
+                <div className="font-mono text-[9px] tracking-[0.25em] uppercase text-ink3 mb-2">
+                  Prossima mossa · {challenge.label}
+                </div>
+                <div className="font-serif text-[22px] font-semibold leading-[1.2] mb-2">
+                  {proposal.argomento}
+                </div>
+                <div className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink3">
+                  {proposal.materia.materia}
+                </div>
+              </div>
+              <div
+                className="flex-shrink-0 font-mono text-[10px] text-app-white px-2.5 py-1"
+                style={{ backgroundColor: proposal.materia.colore }}
+              >
+                #{proposal.index + 1}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+              <div className="border border-border2 bg-bg px-4 py-3">
+                <div className="font-mono text-[8px] tracking-[0.2em] uppercase text-ink3 mb-1.5">
+                  Challenge
+                </div>
+                <div className="text-[12px] leading-[1.6] text-ink2">{challenge.task}</div>
+              </div>
+              <div className="border border-border2 bg-bg px-4 py-3">
+                <div className="font-mono text-[8px] tracking-[0.2em] uppercase text-ink3 mb-1.5">
+                  Miglioramento iterativo
+                </div>
+                <div className="text-[12px] leading-[1.6] text-ink2">{challenge.improve}</div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button
+                className="border border-ink bg-ink text-app-white px-4 py-2 font-mono text-[10px] tracking-[0.15em] uppercase hover:bg-[#333] transition-colors"
+                onClick={() => markProposalDone(proposal)}
+              >
+                Segna fatto
+              </button>
+              <button
+                className="border border-border bg-transparent px-4 py-2 font-mono text-[10px] tracking-[0.15em] uppercase text-ink2 hover:border-ink hover:text-ink hover:bg-bg transition-all"
+                onClick={goToNextProposal}
+              >
+                Altra proposta
+              </button>
+              <button
+                className="border border-border bg-transparent px-4 py-2 font-mono text-[10px] tracking-[0.15em] uppercase text-ink2 hover:border-ink hover:text-ink hover:bg-bg transition-all"
+                onClick={() => setOpen(prev => ({ ...prev, [proposal.materia.id]: true }))}
+              >
+                Apri materia
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="px-6 py-5">
+            <div className="font-mono text-[9px] tracking-[0.25em] uppercase text-ink3 mb-2">
+              Prossima mossa
+            </div>
+            <div className="font-serif text-[22px] font-semibold leading-[1.2] mb-2">
+              Programma completato
+            </div>
+            <p className="text-[12px] text-ink3 leading-[1.6]">
+              Ora usa la libreria per ripassare le sessioni salvate e rifinire gli argomenti piu fragili.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Materie */}
