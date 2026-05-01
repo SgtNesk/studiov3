@@ -224,6 +224,27 @@ export default function Programma() {
     0
   )
   const pct = totalArgomenti > 0 ? Math.round((totalDone / totalArgomenti) * 100) : 0
+
+  const perMateriaProgress = PROGRAMMA.map(materia => {
+    const completed = materia.argomenti.filter((_, i) => done[`${materia.id}_${i}`]).length
+    const total = materia.argomenti.length
+    const ratio = total > 0 ? completed / total : 1
+    return {
+      id: materia.id,
+      completed,
+      total,
+      ratio,
+      remaining: total - completed,
+    }
+  })
+
+  const weakestMateria = perMateriaProgress
+    .filter(item => item.remaining > 0)
+    .sort((a, b) => {
+      if (a.ratio !== b.ratio) return a.ratio - b.ratio
+      return b.remaining - a.remaining
+    })[0]
+
   const pendingTopics = PROGRAMMA.flatMap(materia =>
     materia.argomenti
       .map((argomento, index) => ({
@@ -234,47 +255,53 @@ export default function Programma() {
       }))
       .filter(item => !done[item.key])
   )
-  const proposal = pendingTopics.length > 0
-    ? pendingTopics[proposalIndex % pendingTopics.length]
+
+  const pendingWeak = weakestMateria
+    ? pendingTopics.filter(item => item.materia.id === weakestMateria.id)
+    : []
+  const pendingOther = weakestMateria
+    ? pendingTopics.filter(item => item.materia.id !== weakestMateria.id)
+    : pendingTopics
+  const prioritizedPending = [...pendingWeak, ...pendingOther]
+
+  const proposal = prioritizedPending.length > 0
+    ? prioritizedPending[proposalIndex % prioritizedPending.length]
     : null
+
   const challenge = proposal
     ? CHALLENGES[(proposalIndex + totalDone) % CHALLENGES.length]
     : null
+  const challengeIteration = proposal
+    ? Math.floor(proposalIndex / Math.max(prioritizedPending.length, 1)) + 1
+    : 0
 
   return (
     <div className="max-w-[860px] mx-auto px-7 py-12">
-      {/* Header */}
-      <div className="mb-10">
-        <div className="font-mono text-[9px] tracking-[0.3em] uppercase text-ink3 mb-2">
-          Esame di Stato 2026
-        </div>
-        <h1 className="font-serif text-[36px] font-semibold leading-[1.15] mb-4">
-          Programma
-        </h1>
-        {/* Progress bar */}
-        <div className="flex items-center gap-4 mb-1">
-          <div className="flex-1 h-[3px] bg-border relative overflow-hidden">
-            <div
-              className="absolute left-0 top-0 h-full bg-ink transition-all duration-500"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <span className="font-mono text-[11px] text-ink3 flex-shrink-0">
-            {totalDone}/{totalArgomenti} — {pct}%
-          </span>
-        </div>
-        <p className="text-[12px] text-ink3">
-          Spunta gli argomenti man mano che li studi. Il progresso si salva automaticamente.
-        </p>
-      </div>
-
-      {/* Proposta studio */}
+      {/* Proposta studio in testa */}
       <div
-        className="bg-app-white border border-border mb-8 overflow-hidden"
+        className="bg-app-white border border-border mb-10 overflow-hidden"
         style={{ borderTopColor: proposal?.materia.colore || '#18160f', borderTopWidth: 3 }}
       >
         {proposal && challenge ? (
           <div className="px-6 py-5">
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mb-3">
+              <div className="font-mono text-[9px] tracking-[0.25em] uppercase text-ink3">
+                Argomento consigliato ora
+              </div>
+              <span className="font-mono text-[9px] text-ink3">·</span>
+              <div className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink3">
+                Iterazione {challengeIteration}
+              </div>
+              {weakestMateria && (
+                <>
+                  <span className="font-mono text-[9px] text-ink3">·</span>
+                  <div className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink3">
+                    Focus materia piu indietro
+                  </div>
+                </>
+              )}
+            </div>
+
             <div className="flex items-start justify-between gap-5 mb-4">
               <div className="min-w-0">
                 <div className="font-mono text-[9px] tracking-[0.25em] uppercase text-ink3 mb-2">
@@ -344,6 +371,31 @@ export default function Programma() {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Header */}
+      <div className="mb-10">
+        <div className="font-mono text-[9px] tracking-[0.3em] uppercase text-ink3 mb-2">
+          Esame di Stato 2026
+        </div>
+        <h1 className="font-serif text-[36px] font-semibold leading-[1.15] mb-4">
+          Programma
+        </h1>
+        {/* Progress bar */}
+        <div className="flex items-center gap-4 mb-1">
+          <div className="flex-1 h-[3px] bg-border relative overflow-hidden">
+            <div
+              className="absolute left-0 top-0 h-full bg-ink transition-all duration-500"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <span className="font-mono text-[11px] text-ink3 flex-shrink-0">
+            {totalDone}/{totalArgomenti} — {pct}%
+          </span>
+        </div>
+        <p className="text-[12px] text-ink3">
+          Spunta gli argomenti man mano che li studi. Il progresso si salva automaticamente.
+        </p>
       </div>
 
       {/* Materie */}
